@@ -13,8 +13,10 @@
     - Also inferencing per sample
     - Name of backend  
 */
-template <typename T>
-requires std::is_arithmetic_v<T> // Integral or floating type
+
+template<typename T>
+concept Arithmetic = std::is_arithmetic_v<T>; 
+template <Arithmetic T>
 class IBackendBase
 {
     public:

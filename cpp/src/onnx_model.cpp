@@ -1,6 +1,6 @@
 #include "onnx_model.h"
 
-template<typename T>
+template<Arithmetic T>
 void ONNXModel<T>::init(const std::string &model_path) 
 {
     session = std::make_unique<Ort::Session>(getONNXEnv(), model_path.c_str(), getSessionOptions());
@@ -31,19 +31,19 @@ void ONNXModel<T>::init(const std::string &model_path)
     std::memset(input_ptr, 0, input_size * sizeof(T));
 }
 
-template<typename T>
+template<Arithmetic T>
 void ONNXModel<T>::reset_input_tensor()
 {
     std::memset(input_ptr, 0, input_size * sizeof(T));
 }
 
-template<typename T>
-void ONNXModel<T>::set_input_tensor(const std::vector<T> &input) noexcept
+template<Arithmetic T>
+void ONNXModel<T>::set_input_tensor(const std::vector<T> &input) 
 {
     std::memcpy(input_ptr, input.data(), input_size * sizeof(T));
 }
 
-template<typename T>
+template<Arithmetic T>
 std::vector<T> ONNXModel<T>::inference_batch(const std::vector<T> &input, const int64_t batch_size)
 {
     auto shape = input_shape;
@@ -56,17 +56,17 @@ std::vector<T> ONNXModel<T>::inference_batch(const std::vector<T> &input, const 
         shape.size()
     ); 
     std::vector<Ort::Value> outputs = session->Run(run_options, input_names.data(), &batch_tensor, 1, output_names.data(), output_count);
-    T* output_ptr = outputs[0].GetTensorData<T>();
+    const T* output_ptr = outputs[0].GetTensorData<T>();
     std::size_t output_size = outputs[0].GetTensorTypeAndShapeInfo().GetElementCount();
     return std::vector<T>(output_ptr, output_ptr + output_size);
 }
 
-template<typename T>
+template<Arithmetic T>
 std::vector<T> ONNXModel<T>::inference_sample(const std::vector<T> &input)
 {
     set_input_tensor(input);
     std::vector<Ort::Value> outputs = session->Run(run_options, input_names.data(), &input_tensor, 1, output_names.data(), output_count);
-    T* output_ptr = outputs[0].GetTensorData<T>();
+    const T* output_ptr = outputs[0].GetTensorData<T>();
     std::size_t output_size = outputs[0].GetTensorTypeAndShapeInfo().GetElementCount();
     return std::vector<T>(output_ptr, output_ptr + output_size);
 }

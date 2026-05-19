@@ -23,12 +23,11 @@ inline static Ort::SessionOptions& getSessionOptions() noexcept
         return options;
     }();
     return session_options;
-}
+} 
 
 
-template <typename T>
-requires std::is_arithmetic_v<T>
-class ONNXModel : public IBackendBase<T>
+template <Arithmetic T>
+class ONNXModel : public IBackendBase<T> 
 {
     public:
         // Implement the virtual functions from IBackendBase
@@ -36,7 +35,7 @@ class ONNXModel : public IBackendBase<T>
         ONNXModel(const std::string &model_path)
         { 
             init(model_path);
-        }
+        } 
         ~ONNXModel() override = default;
         std::vector<T> inference_batch(const std::vector<T>& input, const int64_t batch_size) override;
         std::vector<T> inference_sample(const std::vector<T> &input) override;
@@ -57,5 +56,7 @@ class ONNXModel : public IBackendBase<T>
         Ort::MemoryInfo memory_info{nullptr};
         Ort::RunOptions run_options{nullptr};
 };
+
+template class ONNXModel<float>;
 
 #endif 
