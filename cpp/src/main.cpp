@@ -58,8 +58,7 @@ int main(int argc, char** argv)
         default:
             throw std::runtime_error("Multiple model paths provided. Only one is supported.");
     }
-    std::unique_ptr<InputProvider<float>> input_provider = std::make_unique<InputProvider<float>>(input_file_path);
-    input_provider->set_batch_size(batch_size);
+    std::unique_ptr<InputProvider<float>> input_provider = std::make_unique<InputProvider<float>>(input_file_path, batch_size);
     switch (backendType)
     {
         case BackendType::ONNXRunTime:

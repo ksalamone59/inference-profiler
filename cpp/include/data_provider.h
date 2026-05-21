@@ -13,7 +13,11 @@
 #include "custom_concepts.h"
 
 inline std::mt19937 rng(42); // Fixed seed for reproducibility
-constexpr std::size_t NUM_RANDOM_POINTS = 1000; // Default number of random points
+inline std::size_t num_random_points(std::size_t batch_size)
+{
+    constexpr std::size_t base = 1000;
+    return (base / batch_size) * batch_size;
+}
 template<Arithmetic T>
 std::uniform_real_distribution<T> dist(-10.0, 10.0);
 
@@ -47,13 +51,12 @@ class InputProvider
         void load_data_from_file(const std::string &file_path);
     public:
         InputProvider() = default;
-        InputProvider(const std::optional<std::string> &input_file_path);
+        InputProvider(const std::optional<std::string> &input_file_path, const std::size_t batch_size);
         ~InputProvider() = default;
         const Data<T>& get_data() const { return input_data;};
         const std::vector<T>& get_x() const { return input_data.x;}
         const std::vector<T>& get_y() const { return input_data.y;}
         void set_noise_level(const T new_noise_level) { noise_level = new_noise_level; }
-        void set_batch_size(const std::size_t new_batch_size) { batch_size = new_batch_size; }
         BatchedView<T> get_batch(std::size_t i);
 };
 

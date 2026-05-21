@@ -1,15 +1,16 @@
 #include "data_provider.h"
 
 template<Arithmetic T>
-InputProvider<T>::InputProvider(const std::optional<std::string> &input_file_path) 
+InputProvider<T>::InputProvider(const std::optional<std::string> &input_file_path, std::size_t batch_size) 
 {
+    this->batch_size = batch_size;
     if(input_file_path.has_value())
     {
         load_data_from_file(input_file_path.value());
     }
     else 
     {
-        generate_random_data(NUM_RANDOM_POINTS);
+        generate_random_data(num_random_points(batch_size));
     }
 }
 
