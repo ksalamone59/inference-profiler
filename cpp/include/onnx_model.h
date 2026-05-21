@@ -38,7 +38,7 @@ class ONNXModel : public IBackendBase<T>
         } 
         ~ONNXModel() override = default;
         std::vector<T> inference(std::span<const T> input) override;
-        std::string_view name() const override { return "ONNXModel"; }
+        std::string_view name() const override { return "ONNXRunTime"; }
         void reset_input_tensor() override;
         void set_input_tensor(std::span<const T> input) override;
         int64_t get_batch_size() const override {return batch_size;}

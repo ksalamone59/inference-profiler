@@ -1,8 +1,17 @@
 #include "CLI/CLI.hpp"
 #include "onnx_model.h"
+#include "torch_model.h"
 #include "main.h"
 #include "data_provider.h"
 #include "benchmarker.h"
+
+/*
+TODO: move CMake, add comparison run mode that needs 2 -b 
+to compare b/n, add option for outputting results to csv or .dat,
+then load gnu submodule again
+One-liner for now: 
+cmake .. -DONNXRUNTIME_DIR=/home/ksalamone59/src/muse/external/onnxruntime/ -DLIBTORCH_DIR=/home/ksalamone59/Packages/libtorch/ && make
+*/
 
 int main(int argc, char** argv)
 {
@@ -18,7 +27,9 @@ int main(int argc, char** argv)
         CLI::CheckedTransformer(std::map<std::string, BackendType>{
             {"onnxruntime", BackendType::ONNXRunTime},
             {"onnx", BackendType::ONNXRunTime},
-            {"ort", BackendType::ONNXRunTime}
+            {"ort", BackendType::ONNXRunTime},
+            {"torch", BackendType::Torch},
+            {"pytorch", BackendType::Torch}
         })
     );
     app.add_option("-r,--run-mode", runMode, "Run mode")->transform(
@@ -28,8 +39,8 @@ int main(int argc, char** argv)
         })
     )->default_val("inference");
     auto num_iterations_opt = app.add_option("-n,--num-iterations", "Number of benchmark iterations. Only useful in benchmark mode.");
-    auto input_model_path_opt = app.add_option("-m,--model-path", model_path, "Path to model file if applicable.")
-    ->default_val("../../onnx_file/function_model.onnx");
+    auto input_model_path_opt = app.add_option("-m,--model-path", model_path, "Path to model file if applicable, without file extension.")
+    ->default_val("../../model_files/function_model");
     auto input_file_opt = app.add_option("-i,--input-file","Path to input data file if exists. If not given, random data will be generated.");
     app.add_option("--batch-size", batch_size, "Batch size for inference when in batch mode")->default_val(1);
     CLI11_PARSE(app, argc, argv);
@@ -63,7 +74,10 @@ int main(int argc, char** argv)
     {
         case BackendType::ONNXRunTime:
             // TODO: move CMake to top level, make top level build, code easier path
-            backend = std::make_unique<ONNXModel<float>>(model_path, batch_size);
+            backend = std::make_unique<ONNXModel<float>>(model_path + ".onnx", batch_size);
+            break;
+        case BackendType::Torch:
+            backend = std::make_unique<TorchModel<float>>(model_path + ".pt", batch_size);
             break;
         default:
             throw std::runtime_error("Unsupported backend type " + std::to_string(static_cast<int>(backendType)));

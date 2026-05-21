@@ -4,7 +4,8 @@
 // More to be added 
 enum class BackendType 
 {
-    ONNXRunTime
+    ONNXRunTime,
+    Torch
 };
 
 enum class RunMode
