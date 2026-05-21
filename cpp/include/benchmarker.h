@@ -79,7 +79,7 @@ std::ostream& operator<<(std::ostream& os, const benchmarker<T> &b)
     double seconds = mean_iteration_ms / 1000.0;
     double throughput = (seconds > 0) ? total_samples / seconds : 0.0;
     
-    os << "\n[" << b.model.name() << "]. Batch size: " << b.model.get_batch_size() << "\n";
+    os << "\n[" << b.model.name() << "]. Batch size: " << b.model.get_batch_size() << ". Number of iterations: " << b.num_iterations << "\n";
     os << "Mean iteration time: " << mean_iteration_ms << " ms\n";
     os << "Latency/sample: " << per_sample_ms << " ms\n";
     os << "Stddev (iteration): " << stddev << " ms\n";
