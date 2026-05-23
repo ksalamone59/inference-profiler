@@ -59,11 +59,24 @@ class benchmarker
         }
         void warmup(std::size_t n = 100)
         {
-            auto x = input_provider.get_batch(0);
-            for (std::size_t i = 0; i < n; i++)
+            std::size_t p{0};
+            while(p++ < n)
             {
-                (void)model.inference(x.x);
+                for (std::size_t i = 0; i < input_provider.get_data().size(); i+=model.get_batch_size())
+                {
+                    auto x = input_provider.get_batch(i);
+                    (void)model.inference(x.x);
+                }
             }
+        }
+        double get_mean_ms() const { return mean_ms; }
+        double get_variance() const { return (iteration > 1) ? (M2 / (iteration - 1)) : 0.0; }
+        double get_throughput() const 
+        {
+            const double total_samples = static_cast<double>(input_provider.get_data().size());
+            const double mean_iteration_ms = mean_ms;
+            double seconds = mean_iteration_ms / 1000.0;
+            return (seconds > 0) ? total_samples / seconds : 0.0;
         }
         friend std::ostream& operator<< <>(std::ostream& os, const benchmarker<T>& b);
 };
@@ -71,21 +84,14 @@ class benchmarker
 template<Arithmetic T>
 std::ostream& operator<<(std::ostream& os, const benchmarker<T> &b)
 {
-    double variance = (b.iteration > 1) ? (b.M2 / (b.iteration - 1)) : 0.0;
-    double stddev = std::sqrt(variance);
     const double total_samples = static_cast<double>(b.input_provider.get_data().size());
-    const double mean_iteration_ms = b.mean_ms;
-    double per_sample_ms = mean_iteration_ms / total_samples;
-    double seconds = mean_iteration_ms / 1000.0;
-    double throughput = (seconds > 0) ? total_samples / seconds : 0.0;
-    
+    double per_sample_ms = b.get_mean_ms() / total_samples;
+    double seconds = b.get_mean_ms() / 1000.0;
     os << "\n[" << b.model.name() << "]. Batch size: " << b.model.get_batch_size() << ". Number of iterations: " << b.num_iterations << "\n";
-    os << "Mean iteration time: " << mean_iteration_ms << " ms\n";
+    os << "Mean iteration time: " << b.get_mean_ms() << " +/- " << std::sqrt(b.get_variance()) << " ms\n";
     os << "Latency/sample: " << per_sample_ms << " ms\n";
-    os << "Stddev (iteration): " << stddev << " ms\n";
-    if(seconds > 0) os << "Throughput: " << throughput << " samples/sec\n";
+    if(seconds > 0) os << "Throughput: " << b.get_throughput() << " samples/sec\n";
     else os << "Throughput: N/A (mean iteration time of zero seconds!)\n";
-    
     return os;
 }
 

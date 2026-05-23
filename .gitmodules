@@ -1,3 +1,6 @@
 [submodule "external/CLI11"]
 	path = external/CLI11
 	url = https://github.com/CLIUtils/CLI11
+[submodule "Plotting"]
+	path = Plotting
+	url = git@github.com:ksalamone59/gnuplot_latex_utils.git

@@ -1,5 +1,5 @@
 #include "onnx_model.h"
-#include <iostream>
+
 template class ONNXModel<float>;
 
 template<Arithmetic T>

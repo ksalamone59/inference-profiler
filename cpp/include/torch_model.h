@@ -3,7 +3,21 @@
 
 #include "backend_base.h"
 #include "torch/script.h"
+#include "ATen/Parallel.h"
 
+namespace torch_helpers
+{
+    inline bool torch_threads_set = false;
+    inline void set_num_torch_threads(std::size_t num_threads)
+    {
+        if(torch_helpers::torch_threads_set)
+        {
+            return;
+        }
+        at::set_num_threads(num_threads);
+        torch_helpers::torch_threads_set = true;
+    }
+};
 template<Arithmetic T>
 class TorchModel: public IBackendBase<T>
 {

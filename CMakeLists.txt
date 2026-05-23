@@ -3,7 +3,7 @@ project(backend_profiler)
 set(CMAKE_CXX_STANDARD 20)
 set(LIBTORCH_DIR "" CACHE PATH "Path to Torch installation")
 set(ONNXRUNTIME_DIR "" CACHE PATH "Path to ONNX Runtime installation")
-set(CLI11_DIR "${CMAKE_SOURCE_DIR}/../external/CLI11" CACHE PATH "Path to CLI11 installation")
+set(CLI11_DIR "${CMAKE_SOURCE_DIR}/external/CLI11" CACHE PATH "Path to CLI11 installation")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -37,12 +37,12 @@ find_path(CLI11_INCLUDE_DIR
     NO_DEFAULT_PATH
 )
 
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "cpp/src/*.cpp")
 add_executable(backend_profiler ${SOURCES})
 
 target_include_directories(backend_profiler PRIVATE
     ${CLI11_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/cpp/include
 )
 
 target_compile_options(backend_profiler PRIVATE -Wall -Wextra -Wpedantic)

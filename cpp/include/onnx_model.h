@@ -4,6 +4,32 @@
 #include "backend_base.h"
 #include "onnxruntime_cxx_api.h"
 
+namespace ort_helpers
+{
+    inline bool onnx_threads_set = false;
+    struct ortThreadConfig
+    {
+        int num_intra_threads{1};
+        const int num_inter_threads{1};
+    };
+
+    inline ortThreadConfig& getOrtThreadConfig()
+    {
+        static ortThreadConfig config;
+        return config;
+    }
+
+    inline void set_num_onnx_threads(std::size_t num_threads)
+    {
+        if(ort_helpers::onnx_threads_set)
+        {
+            return;
+        }
+        getOrtThreadConfig().num_intra_threads = num_threads;
+        ort_helpers::onnx_threads_set = true;
+    }
+};
+
 // Meyers Singleton for env and session options 
 inline Ort::Env& getONNXEnv() noexcept
 {
@@ -14,9 +40,10 @@ inline Ort::Env& getONNXEnv() noexcept
 inline Ort::SessionOptions& getSessionOptions() noexcept 
 {
     static Ort::SessionOptions session_options = [](){  
+        auto &config = ort_helpers::getOrtThreadConfig();
         Ort::SessionOptions options;  
-        options.SetIntraOpNumThreads(1);
-        options.SetInterOpNumThreads(1);
+        options.SetIntraOpNumThreads(config.num_intra_threads);
+        options.SetInterOpNumThreads(config.num_inter_threads);
         options.SetExecutionMode(ExecutionMode::ORT_SEQUENTIAL);
         options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
         options.EnableMemPattern(); 
