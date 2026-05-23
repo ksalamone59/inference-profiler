@@ -8,14 +8,6 @@
 #include <type_traits>
 #include "custom_concepts.h"
 
-/* Needed for this class: 
-    - Virtual destructor 
-    - Initialization (not used heavily by all backends)
-    - Inferencing batched data 
-    - Also inferencing per sample
-    - Name of backend  
-*/
-
 template <Arithmetic T>
 class IBackendBase
 {
