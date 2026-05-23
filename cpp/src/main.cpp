@@ -1,15 +1,11 @@
 #include "main.h"
 
 
-/*
-TODO: write README, add nice plots to it, extend plots. Have inference output the inferred values
-Figure out how to best use Plotting submodule without editing original
-*/
-
 int main(int argc, char** argv)
 {
     at::set_num_interop_threads(1);
     CLI::App app{"Inference Profiler"};
+    app.footer("Run './backend_profiler <subcommand> --help' for subcommand-specific options.");
     std::unique_ptr<IBackendBase<float>> backend;
     std::string model_path;
     BackendType backendType_infer, backendType_bench;
@@ -26,8 +22,7 @@ int main(int argc, char** argv)
     compare_subcommand->add_option("-b,--backend", backendType_compare, "Backend type")->required()->transform(backend_transformer)->required()->expected(2);
     sweep_subcommand->add_option("-b,--backend", backendType_bench, "Backend type")->required()->transform(backend_transformer)->required()->expected(1);
 
-    auto output_dat_opt = sweep_subcommand->add_option("-o,--output", "Path to output .dat file for sweep results.")
-    ->required()->expected(1);
+    auto output_dat_opt = app.add_option("-o,--output", "Path to output .dat file for inference or sweep results.")->default_str("results.dat");
 
     auto num_iterations_opt = app.add_option("-n,--num-iterations", "Number of benchmark iterations. Only useful in benchmark mode.");
     auto input_model_path_opt = app.add_option("-m,--model-path", model_path, "Path to model file if applicable, without file extension.")
@@ -36,6 +31,10 @@ int main(int argc, char** argv)
     app.add_option("--batch-size", batch_size, "Batch size for inference.")->default_val(1);
     auto num_threads_opt = app.add_option("-t,--num-threads", "Number of threads to use for inference.")->default_val(1);
     CLI11_PARSE(app, argc, argv);
+    if(output_dat_opt->count() > 1)
+    {
+        throw std::runtime_error("Multiple output paths provided. Only one is supported.");
+    }
     if(argc == 1)
     {
         std::cerr << app.help() << std::endl;
@@ -76,11 +75,24 @@ int main(int argc, char** argv)
     {
         std::cout << "Running in inference mode.\n";
         set_backend_type(backend, backendType_infer, model_path, batch_size, num_threads_opt);
+        std::string output_dat_path = output_dat_opt->as<std::string>();
+        std::cout << "Output .dat file: " << output_dat_path << std::endl;
+        std::ofstream outfile(output_dat_path, std::ios_base::trunc | std::ios_base::out);
+        if(!outfile.is_open())
+        {
+            throw std::runtime_error("Failed to open output file: " + output_dat_opt->as<std::string>());
+        }
+        outfile << "# x y\n";
         for(std::size_t i=0;i<input_provider->get_data().size();i+=batch_size)
         {
             auto batch = input_provider->get_batch(i);
             auto output = backend->inference(batch.x);
+            for(std::size_t j = 0; j < output.size(); j++)
+            {
+                outfile << batch.x[j] << " " << output[j] << "\n";
+            }
         }
+        outfile.close();
     }
     else if(benchmark_subcommand->parsed())
     {
@@ -113,18 +125,20 @@ int main(int argc, char** argv)
         }
         comparator comp(*backends[0], *backends[1], *input_provider);
         comp.generate_results(num_iterations_opt->count() == 1 ? std::optional<std::size_t>(num_iterations_opt->as<std::size_t>()) : std::nullopt);
+        comp.print_results();
     }
     else if(sweep_subcommand->parsed())
     {
         std::cout << "Running in sweep mode.\n";
         std::vector<std::size_t> batch_sizes = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
         // Ensure the end of file is .dat
-        std::string output_file_path = output_dat_opt->as<std::string>();
-        if(!output_file_path.ends_with(".dat"))
+        std::string output_dat_path = output_dat_opt->as<std::string>();
+        if(!output_dat_path.ends_with(".dat"))
         {
-            output_file_path += ".dat";
+            output_dat_path += ".dat";
         }
-        std::ofstream outfile(output_file_path, std::ios_base::trunc);
+        std::ofstream outfile(output_dat_path, std::ios_base::trunc);
+        std::cout << "Output .dat file: " << output_dat_path << std::endl;
         if(!outfile.is_open())
         {
             throw std::runtime_error("Failed to open output file: " + output_dat_opt->as<std::string>());

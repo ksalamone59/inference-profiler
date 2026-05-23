@@ -10,8 +10,9 @@
 #include "median.h"
 #include <set>
 #include <map>
+#include <fstream>
 
-// More to be added 
+// More backends to be added 
 enum class BackendType 
 {
     ONNXRunTime,
@@ -62,6 +63,5 @@ inline std::ostream& operator<<(std::ostream& os, const BackendType& b)
         default: return os << "unknown";
     }
 }
-
 
 #endif 

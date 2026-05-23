@@ -8,7 +8,7 @@ set key top right offset -5,0
 
 set title "Mean Inference Time vs Batch Size" 
 set xlabel 'log2(Batch Size)' 
-set ylabel "Mean Inference Time (ms)" offset -2,0
+set ylabel "Mean Inference Time (ms)" 
 
 set xrange[-0.5:10.5]
 set logscale y

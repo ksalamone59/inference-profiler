@@ -9,12 +9,14 @@
 #include <span>
 #include <format>
 
-constexpr auto GREEN  = "\033[32m";
-constexpr auto BOLD = "\033[1m";
-constexpr auto WHITE = "\033[37m";
-constexpr auto CYAN   = "\033[36m";
-constexpr auto RESET   = "\033[0m";
-
+namespace terminal_colors
+{
+    constexpr auto GREEN  = "\033[32m";
+    constexpr auto BOLD = "\033[1m";
+    constexpr auto WHITE = "\033[37m";
+    constexpr auto CYAN   = "\033[36m";
+    constexpr auto RESET   = "\033[0m";
+};
 
 struct comparison_results
 {
@@ -81,20 +83,23 @@ class comparator
             model_to_model.mae = metrics::mae(predictions1_span, predictions2_span);
             model_to_model.max_error = metrics::max_error(predictions1_span, predictions2_span);
             model_to_model.r2 = metrics::r2(predictions1_span, predictions2_span);
+        }
+        void print_results()
+        {
             // Print table nicely 
             std::cout << "Batch size: " << model1.get_batch_size() << "\n";
-            std::cout << CYAN << "================ Inference Performance Comparison ================\n" << RESET;
-            std::cout << BOLD << WHITE << std::left << std::setw(20) << "Model " << std::setw(15) << "Mean Time (ms)" << std::setw(15) << "Throughput" << std::setw(15) << "Std Dev" << "\n" << RESET;
-            std::cout << GREEN << std::left << std::setw(20) << model1.name() << std::setw(15) << results1.mean_time << std::setw(15) << results1.throughput << std::setw(15) << results1.stddev << "\n" << RESET;
-            std::cout << GREEN << std::left << std::setw(20) << model2.name() << std::setw(15) << results2.mean_time << std::setw(15) << results2.throughput << std::setw(15) << results2.stddev << "\n" << RESET;
-            std::cout << CYAN << "================ Correctness Comparison ================\n" << RESET;
-            std::cout << BOLD << WHITE << std::left << std::setw(20) << "Model " << std::setw(15) << "MSE" << std::setw(15) << "MAE" << std::setw(15) << "Max Error" << std::setw(15) << " R^{2}" << "\n" << RESET;
-            std::cout << GREEN << std::left << std::setw(20) << model1.name() << std::setw(15) << results1.mse << std::setw(15) << results1.mae << std::setw(15) << results1.max_error<< std::setw(15) << results1.r2<< "\n" << RESET;
-            std::cout<< GREEN << std::left<< std::setw(20)<< model2.name()<< std::setw(15)<< results2.mse<< std::setw(15)<< results2.mae<< std::setw(15)<< results2.max_error<< std::setw(15)<< results2.r2<< "\n" << RESET;
-            std::cout << CYAN << "================ Model-to-Model Comparison ================\n" << RESET;
-            std::cout << BOLD << WHITE << std::left << std::setw(20) << "Model" << std::setw(15) << "MSE" << std::setw(15) << "MAE" << std::setw(15) << "Max Error" << std::setw(15) << "R^2" << "\n" << RESET;
+            std::cout << terminal_colors::CYAN << "================ Inference Performance Comparison ================\n" << terminal_colors::RESET;
+            std::cout << terminal_colors::BOLD << terminal_colors::WHITE << std::left << std::setw(20) << "Model " << std::setw(15) << "Mean Time (ms)" << std::setw(15) << "Throughput" << std::setw(15) << "Std Dev" << "\n" << terminal_colors::RESET;
+            std::cout << terminal_colors::GREEN << std::left << std::setw(20) << model1.name() << std::setw(15) << results1.mean_time << std::setw(15) << results1.throughput << std::setw(15) << results1.stddev << "\n" << terminal_colors::RESET;
+            std::cout << terminal_colors::GREEN << std::left << std::setw(20) << model2.name() << std::setw(15) << results2.mean_time << std::setw(15) << results2.throughput << std::setw(15) << results2.stddev << "\n" << terminal_colors::RESET;
+            std::cout << terminal_colors::CYAN << "================ Correctness Comparison ================\n" << terminal_colors::RESET;
+            std::cout << terminal_colors::BOLD << terminal_colors::WHITE << std::left << std::setw(20) << "Model " << std::setw(15) << "MSE" << std::setw(15) << "MAE" << std::setw(15) << "Max Error"<< std::setw(15) <<" R^{2}"<< "\n"<< terminal_colors::RESET;
+            std::cout << terminal_colors::GREEN << std::left << std::setw(20) << model1.name() << std::setw(15) << results1.mse << std::setw(15) << results1.mae << std::setw(15) << results1.max_error<< std::setw(15) << results1.r2<< "\n" << terminal_colors::RESET;
+            std::cout<< terminal_colors::GREEN << std::left<< std::setw(20)<< model2.name()<< std::setw(15)<< results2.mse<< std::setw(15)<< results2.mae<< std::setw(15)<< results2.max_error<< std::setw(15)<< results2.r2<< "\n" << terminal_colors::RESET;
+            std::cout << terminal_colors::CYAN << "================ Model-to-Model Comparison ================\n" << terminal_colors::RESET;
+            std::cout << terminal_colors::BOLD << terminal_colors::WHITE << std::left << std::setw(20) << "Model" << std::setw(15) << "MSE" << std::setw(15) << "MAE" << std::setw(15) << "Max Error" << std::setw(15) << "R^2" << "\n" << terminal_colors::RESET;
             auto pair_name = std::format("{} - {}", model1.name(), model2.name());
-            std::cout << GREEN <<  std::left << std::setw(20) << pair_name << std::setw(15) << model_to_model.mse << std::setw(15) << model_to_model.mae << std::setw(15) << model_to_model.max_error << std::setw(15) << model_to_model.r2 << "\n" << RESET;
+            std::cout << terminal_colors::GREEN <<  std::left << std::setw(20) << pair_name << std::setw(15) << model_to_model.mse << std::setw(15) << model_to_model.mae << std::setw(15) << model_to_model.max_error << std::setw(15) << model_to_model.r2 << "\n" << terminal_colors::RESET;
         }
 };
 
