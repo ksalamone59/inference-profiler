@@ -7,7 +7,7 @@ set lmargin 10
 set key top left offset 2,0
 
 set title "Throughput vs Batch Size" 
-set xlabel 'log2(Batch Size)' 
+set xlabel '$\log_{2}(\text{Batch Size})$' 
 set ylabel "Throughput (millions of samples/sec)" offset -2,0
 
 set xrange[-0.5:10.5]

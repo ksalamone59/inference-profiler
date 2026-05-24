@@ -7,7 +7,7 @@ set lmargin 10
 set key top right offset -5,0
 
 set title "Mean Inference Time vs Batch Size" 
-set xlabel 'log2(Batch Size)' 
+set xlabel '$\log_{2}(\text{Batch Size})$' 
 set ylabel "Mean Inference Time (ms)" 
 
 set xrange[-0.5:10.5]
