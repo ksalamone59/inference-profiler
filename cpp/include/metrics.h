@@ -81,7 +81,7 @@ namespace metrics
             ss_res += diff_res * diff_res;
             ss_tot += diff_tot * diff_tot;
         }
-        return (ss_tot > 0. ? 1.0 - (ss_res / ss_tot) : 1.0);
+        return (ss_tot > 1.e-12 ? 1.0 - (ss_res / ss_tot) : 1.0);
     }
 };
 

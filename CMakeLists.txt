@@ -7,55 +7,67 @@ set(CLI11_DIR "${CMAKE_SOURCE_DIR}/external/CLI11" CACHE PATH "Path to CLI11 ins
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(USE_ONNX "Use ONNX Runtime for inference" ON)
-option(USE_TORCH "Use Torch for inference" ON)
-if(USE_ONNX)
-    # Works with both .so and .so.1
-    find_library(ORT_LIB 
-        NAMES libonnxruntime.so.1 libonnxruntime.so onnxruntime
-        PATHS ${ONNXRUNTIME_DIR}/runtimes/linux-x64/native
+# Unit testing option
+set(DO_TESTS OFF CACHE BOOL "Enable unit tests")
+if(NOT DO_TESTS)
+    option(USE_ONNX "Use ONNX Runtime for inference" ON)
+    option(USE_TORCH "Use Torch for inference" ON)
+    if(USE_ONNX)
+        # Works with both .so and .so.1
+        find_library(ORT_LIB 
+            NAMES libonnxruntime.so.1 libonnxruntime.so onnxruntime
+            PATHS ${ONNXRUNTIME_DIR}/runtimes/linux-x64/native
+            NO_DEFAULT_PATH
+        )
+        if(NOT ORT_LIB)
+            message(FATAL_ERROR "Could not find libonnxruntime in ${ONNXRUNTIME_DIR}/runtimes/linux-x64/native")
+        endif()
+        message(STATUS "Found ORT lib: ${ORT_LIB}")
+    endif()
+
+    if(USE_TORCH)
+        if(NOT LIBTORCH_DIR)
+            message(FATAL_ERROR "USE_TORCH requires -DLIBTORCH_DIR=...")
+        endif()
+        set(CMAKE_PREFIX_PATH ${LIBTORCH_DIR})
+        find_package(Torch REQUIRED)
+        message(STATUS "Found Torch: ${Torch_VERSION}")
+    endif()
+
+    find_path(CLI11_INCLUDE_DIR
+        NAMES CLI/CLI.hpp
+        PATHS ${CLI11_DIR}/include
         NO_DEFAULT_PATH
     )
-    if(NOT ORT_LIB)
-        message(FATAL_ERROR "Could not find libonnxruntime in ${ONNXRUNTIME_DIR}/runtimes/linux-x64/native")
-    endif()
-    message(STATUS "Found ORT lib: ${ORT_LIB}")
-endif()
 
-if(USE_TORCH)
-    if(NOT LIBTORCH_DIR)
-        message(FATAL_ERROR "USE_TORCH requires -DLIBTORCH_DIR=...")
-    endif()
-    set(CMAKE_PREFIX_PATH ${LIBTORCH_DIR})
-    find_package(Torch REQUIRED)
-    message(STATUS "Found Torch: ${Torch_VERSION}")
-endif()
+    file(GLOB_RECURSE SOURCES "cpp/src/*.cpp")
+    # Remove testing from sources 
+    list(FILTER SOURCES EXCLUDE REGEX ".*ci_testing.cpp$")
+    add_executable(backend_profiler ${SOURCES})
 
-find_path(CLI11_INCLUDE_DIR
-    NAMES CLI/CLI.hpp
-    PATHS ${CLI11_DIR}/include
-    NO_DEFAULT_PATH
-)
-
-file(GLOB_RECURSE SOURCES "cpp/src/*.cpp")
-add_executable(backend_profiler ${SOURCES})
-
-target_include_directories(backend_profiler PRIVATE
-    ${CLI11_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/cpp/include
-)
-
-target_compile_options(backend_profiler PRIVATE -Wall -Wextra -Wpedantic)
-
-if(USE_ONNX)
     target_include_directories(backend_profiler PRIVATE
-        ${ONNXRUNTIME_DIR}/build/native/include
+        ${CLI11_INCLUDE_DIR}
+        ${CMAKE_SOURCE_DIR}/cpp/include
     )
-    target_link_libraries(backend_profiler PRIVATE ${ORT_LIB})
-    target_compile_definitions(backend_profiler PRIVATE USE_ONNX)
-endif()
 
-if(USE_TORCH)
-    target_link_libraries(backend_profiler PRIVATE ${TORCH_LIBRARIES})
-    target_compile_definitions(backend_profiler PRIVATE USE_TORCH)
+    target_compile_options(backend_profiler PRIVATE -Wall -Wextra -Wpedantic)
+
+    if(USE_ONNX)
+        target_include_directories(backend_profiler PRIVATE
+            ${ONNXRUNTIME_DIR}/build/native/include
+        )
+        target_link_libraries(backend_profiler PRIVATE ${ORT_LIB})
+        target_compile_definitions(backend_profiler PRIVATE USE_ONNX)
+    endif()
+
+    if(USE_TORCH)
+        target_link_libraries(backend_profiler PRIVATE ${TORCH_LIBRARIES})
+        target_compile_definitions(backend_profiler PRIVATE USE_TORCH)
+    endif()
+else() # Testing
+    add_executable(backend_ci_testing cpp/src/ci_testing.cpp)
+    target_include_directories(backend_ci_testing PRIVATE
+        ${CMAKE_SOURCE_DIR}/cpp/include
+    )
+    target_compile_options(backend_ci_testing PRIVATE -Wall -Wextra -Wpedantic)
 endif()

@@ -16,7 +16,7 @@ inline std::mt19937 rng(42); // Fixed seed for reproducibility
 inline std::size_t num_random_points(std::size_t batch_size)
 {
     constexpr std::size_t base = 1024;
-    return (base / batch_size) * batch_size;
+    return ((base + batch_size - 1) / batch_size) * batch_size;
 }
 template<Arithmetic T>
 std::uniform_real_distribution<T> dist(-10.0, 10.0);
@@ -101,17 +101,21 @@ class InputProvider
         const std::vector<T>& get_x() const { return input_data.x;}
         const std::vector<T>& get_y() const { return input_data.y;}
         void set_noise_level(const T new_noise_level) { noise_level = new_noise_level; }
-        BatchedView<T> get_batch(std::size_t i)
+        /**
+         * Very technically, this is a sliding window not a batch
+         * However, if you loop through data with index incriments equal to batch_size, it will function as a batch provider
+         */
+        BatchedView<T> get_batch(std::size_t start_index) const
         {
             const std::size_t total = input_data.size();
-            if(i >= total)
+            if(start_index >= total)
             {
                 return { {}, {} };
             }
-            std::size_t sz = std::min(batch_size, (total - i));
+            std::size_t sz = std::min(batch_size, (total - start_index));
             return {
-                std::span<const T>(input_data.x.data() + i, sz),
-                std::span<const T>(input_data.y.data() + i, sz)
+                std::span<const T>(input_data.x.data() + start_index, sz),
+                std::span<const T>(input_data.y.data() + start_index, sz)
             };
         }
 };

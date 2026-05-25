@@ -105,17 +105,19 @@ Command: `./backend_profiler GLOBAL_OPTIONS SUBCOMMAND SUBCOMMAND_SPECIFIC_OPTIO
 │   └── CLI11/
 ├── CMakeLists.txt
 ├── Makefile
+└── test_input.dat
 ├── throughput_per_batch.png
 ├── time_per_batch.png
 ├── requirements.txt
 └── LICENSE
 ```
-- `cpp/src/`: Backend implementations (`onnx_model.cpp`, `torch_model.cpp`, `main.cpp`)
+- `cpp/src/`: Backend implementations (`onnx_model.cpp`, `torch_model.cpp`, `main.cpp`), CI testing file (`ci_testing.cpp`)
 - `cpp/include/`: Headers (`backend_base.h`, `benchmarker.h`, `comparator.h`, `metrics.h`, `data_provider.h`, etc.)
 - `model_files/`: Pre-trained `.onnx` and `.pt` model files
 - `Plotting/`: [gnuplot-latex-utils](https://github.com/ksalamone59/gnuplot_latex_utils) submodule for sweep output plots
 - `external/CLI11/`: CLI11 header-only library
 - `Makefile`: Convenience wrapper around CMake build commands and repository  via `make clean`
+- `test_input.dat` Test input data file for CI testing.
 - `*.png`: output figures used in README.
 
 ## Dependencies 

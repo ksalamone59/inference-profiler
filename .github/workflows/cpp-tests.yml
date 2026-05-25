@@ -1,0 +1,21 @@
+name: Unit Tests
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+    - name: Install build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ make cmake 
+    - name: Build tests
+      run: |
+        cmake -B build_test -DDO_TESTS=ON 
+        cmake --build build_test -j
+    - name: Run tests
+      run: |
+        (cd build_test && ./backend_ci_testing)
