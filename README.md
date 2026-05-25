@@ -1,6 +1,18 @@
 # Inference Profiler Engine 
 
-A lightweight CLI for profiling, benchmarking and comparing different ML inference backends in C++; designed for performance critical environments where Python is not a viable option at runtime. There are four main modes to this CLI:
+## Why This Matters
+A lightweight, reproducible framework in C++20 for comparing, benchmarking and quantifying different ML inference engines with CI-verifiable workloads and comparable results in a high performance C++ environment. This becomes **especially** relevant in workspaces where Python dependencies are not viable. 
+
+## TL;DR
+A C++20 CLI tool for benchmarking different ML inference backends that showcases:
+- deterministic data generation
+- batch sweep profiling
+- statistical benchmarking (Welford variance)
+- CLI-driven backend comparison
+
+## Introduction
+
+There are four main modes to this CLI:
 
 1. Inference - Runs one instance of inference through the chosen model on the given input data.
 2. Benchmark - Benchmarks inference performance for the chosen model and input data. Reports average inference time, standard deviation, throughput, and other related statistics with a user supplied number of iterations (defaults to 1000).
@@ -119,6 +131,16 @@ Command: `./backend_profiler GLOBAL_OPTIONS SUBCOMMAND SUBCOMMAND_SPECIFIC_OPTIO
 - `Makefile`: Convenience wrapper around CMake build commands and repository  via `make clean`
 - `test_input.dat` Test input data file for CI testing.
 - `*.png`: output figures used in README.
+
+## CI Testing
+The CI pipeline validates:
+
+- correctness of `metrics` namespace (MSE, MAE, $R^{2}$)
+- predictable behavior of `InputProvider` (proper random number seeding leading to nearly identical results)
+- batch continuity and slicing logic
+- median edge cases and numerical stability
+
+To run testing: run `make test`. This is done more verbosely in the `cpp-tests.yml` GitHub Actions file. The binary is stored in `build_test/backend_ci_testing`.  
 
 ## Dependencies 
 
