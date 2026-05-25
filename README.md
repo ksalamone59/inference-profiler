@@ -60,10 +60,10 @@ These results are highlighted in the table below for a batch size of 1024 (maxim
 
 | Backend | Mean Time (ms) | Std Dev (ms) | Throughput (millions of samples/s) | $\sigma$ Throughput (millions of samples/s) |
 |---|---|---|---|---|
-| LibTorch | 0.409 | 0.043 | 2.506 | 0.266 |
-| LibTorch: 4 Threads | 0.155 | 0.047 | 6.621 | 2.018 |
-| ONNX Runtime | 0.108 | 0.010 | 9.525 |  1.200 |
-| **ONNX Runtime: 4 Threads** | **0.073** | **0.020** | **13.976** | **3.875** |
+| LibTorch | 0.330 | 0.044 | 1.107 | 0.415 |
+| LibTorch: 4 Threads | 0.214 | 0.047 | 4.791 | 1.062 |
+| ONNX Runtime | 0.108 | 0.014 | 9.520 |  1.470 |
+| **ONNX Runtime: 4 Threads** | **0.074** | **0.016** | **13.763** | **3.082** |
 
 *Results at batch size 1024. Full sweep shown in plots above.*
 
