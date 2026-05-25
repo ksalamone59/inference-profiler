@@ -28,7 +28,7 @@ class TorchModel: public IBackendBase<T>
             init(model_path, batch_size);
         }
         ~TorchModel() override = default;
-        std::vector<T> inference(std::span<const T> input) override;
+        std::span<const T> inference(std::span<const T> input) override;
         std::string_view name() const override { return "Torch"; }
         void reset_input_tensor() override;
         void set_input_tensor(std::span<const T> input) override;
@@ -39,8 +39,8 @@ class TorchModel: public IBackendBase<T>
         torch::jit::script::Module mod; 
         torch::TensorOptions tensor_options;
         std::vector<torch::jit::IValue> inputs;
-        std::vector<T> input_data;
-        torch::Tensor input_tensor;
+        std::vector<T> input_data, output_data;
+        torch::Tensor input_tensor, output_tensor;
 };
 
 #endif 

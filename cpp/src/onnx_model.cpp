@@ -20,6 +20,7 @@ void ONNXModel<T>::init(const std::string &model_path, const int64_t batch_size)
     output_strs = session->GetOutputNames();
     input_names.reserve(input_count);
     output_names.reserve(output_count);
+    output_tensors.reserve(output_count);
     for(size_t i = 0; i < input_count; i++)
     {
         input_names.push_back(input_strs[i].c_str());
@@ -52,11 +53,12 @@ void ONNXModel<T>::set_input_tensor(std::span<const T> input)
 }
 
 template<Arithmetic T>
-std::vector<T> ONNXModel<T>::inference(std::span<const T> input)
+std::span<const T> ONNXModel<T>::inference(std::span<const T> input)
 {
     set_input_tensor(input);
-    std::vector<Ort::Value> outputs = session->Run(run_options, input_names.data(), &input_tensor, 1, output_names.data(), output_count);
-    const T* output_ptr = outputs[0].GetTensorData<T>();
-    std::size_t output_size = outputs[0].GetTensorTypeAndShapeInfo().GetElementCount();
-    return std::vector<T>(output_ptr, output_ptr + output_size);
+    output_tensors = session->Run(run_options, input_names.data(), &input_tensor, 1, output_names.data(), output_count);
+    const T* output_ptr = output_tensors[0].GetTensorData<T>();
+    std::size_t output_size = output_tensors[0].GetTensorTypeAndShapeInfo().GetElementCount();
+    output_data.assign(output_ptr, output_ptr + output_size);
+    return std::span<const T>(output_data);
 }

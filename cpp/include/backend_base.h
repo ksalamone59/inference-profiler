@@ -14,7 +14,7 @@ class IBackendBase
     public:
         virtual ~IBackendBase() = default;
         virtual void init(const std::string &model_path, const int64_t batch_size) = 0; 
-        virtual std::vector<T> inference(std::span<const T> input) = 0;
+        virtual std::span<const T> inference(std::span<const T> input) = 0;
         virtual std::string_view name() const = 0;
         virtual void reset_input_tensor() = 0;
         virtual void set_input_tensor(std::span<const T> input) = 0;

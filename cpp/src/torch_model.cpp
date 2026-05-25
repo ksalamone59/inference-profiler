@@ -53,11 +53,11 @@ void TorchModel<T>::set_input_tensor(std::span<const T> input)
 }
 
 template<Arithmetic T>
-std::vector<T> TorchModel<T>::inference(std::span<const T> input)
+std::span<const T> TorchModel<T>::inference(std::span<const T> input)
 {
     torch::NoGradGuard no_grad; // Ensure no gradients
     set_input_tensor(input);
-    auto output = mod.forward(inputs).toTensor().contiguous();
-    std::vector<T> output_data(output.data_ptr<T>(), output.data_ptr<T>() + output.numel());
-    return output_data;
+    output_tensor = mod.forward(inputs).toTensor().contiguous();
+    output_data.assign(output_tensor.data_ptr<T>(), output_tensor.data_ptr<T>() + output_tensor.numel());
+    return std::span<const T>(output_data);
 }
